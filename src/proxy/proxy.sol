@@ -16,11 +16,11 @@
 
 pragma solidity ^0.8.10;
 
-import { Title, TitleOwned, TitleLike } from "tinlake-title/title.sol";
+import { Title, TitleOwned, TitleLike } from "../ownership/title.sol";
 
-contract RegistryLike {
-    function cacheRead(bytes memory _code) public view returns (address);
-    function cacheWrite(bytes memory _code) public returns (address target);
+interface RegistryLike {
+    function cacheRead(bytes memory _code) external view returns (address);
+    function cacheWrite(bytes memory _code) external returns (address target);
 }
 
 // Proxy is a proxy contract that is controlled by a Title NFT (see tinlake-title)
@@ -30,7 +30,7 @@ contract Proxy is TitleOwned {
     uint public         accessToken;
     RegistryLike public registry;
 
-    constructor() TitleOwned(msg.sender) public {
+    constructor() TitleOwned(msg.sender) {
         registry = RegistryLike(msg.sender);
     }
 
@@ -40,7 +40,7 @@ contract Proxy is TitleOwned {
         accessToken = accessToken_;
     }
 
-    function() external payable {
+    receive() external payable {
     }
 
     function execute(address _target, bytes memory _data)
@@ -53,8 +53,8 @@ contract Proxy is TitleOwned {
 
         // call contract in current context
         assembly {
-            let succeeded := delegatecall(sub(gas, 5000), _target, add(_data, 0x20), mload(_data), 0, 0)
-            let size := returndatasize
+            let succeeded := delegatecall(sub(gas(), 5000), _target, add(_data, 0x20), mload(_data), 0, 0)
+            let size := returndatasize()
 
             response := mload(0x40)
             mstore(0x40, add(response, and(add(add(size, 0x20), 0x1f), not(0x1f))))
@@ -95,7 +95,7 @@ contract ProxyRegistry is Title {
 
     event Created(address indexed sender, address indexed owner, address proxy, uint tokenId);
 
-    constructor() Title("Tinlake Proxy Access Token", "TAAT") public {
+    constructor() Title("Tinlake Proxy Access Token", "TAAT") {
         proxyCode = type(Proxy).creationCode;
         proxyCodeHash = keccak256(abi.encodePacked(proxyCode));
     }
