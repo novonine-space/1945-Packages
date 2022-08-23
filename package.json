@@ -1,0 +1,20 @@
+{
+  "name": "1945-packages",
+  "version": "0.0.1",
+  "description": "Packages for 1945 Factory",
+  "files": [
+    "/src/**/*.sol"
+  ],
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Novonine Space",
+  "license": "ISC",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.6.0"
+  }
+}
